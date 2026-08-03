@@ -116,6 +116,9 @@ export default function AddSite() {
       });
       setConfirmMenuActive(true);
     } else {
+      if (data.newSite) {
+        return handleGoBack();
+      }
       cancelEdits();
     }
   };
