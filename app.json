@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "KeypassGuard",
+    "slug": "KeypassGuard_App",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/ios-light.png",
+    "scheme": "keypassguardapp",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#051923"
+    },
+    "ios": {
+      "usesAppleSignIn": true,
+      "supportsTablet": false,
+      "bundleIdentifier": "com.caldwell.keypassguard",
+      "icon": {
+        "dark": "./assets/ios-dark.png",
+        "light": "./assets/ios-light.png",
+        "tinted": "./assets/ios-tinted.png"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Use your camera in order to add images to records.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select images for add to your records."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#051923"
+      },
+      "package": "com.caldwell.keypassguard",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA",
+        "com.android.vending.BILLING"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
