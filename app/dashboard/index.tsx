@@ -51,9 +51,11 @@ export default function HomeScreen() {
         return true;
       }
     })
-    .sort((a: any, b: any) =>
-      a.name === b.name ? 0 : a.name < b.name ? -1 : 1,
-    );
+    .sort((a: any, b: any) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      return aName === bName ? 0 : aName < bName ? -1 : 1;
+    });
 
   const pressSite = (siteId: string) => {
     // Visual
@@ -114,12 +116,11 @@ export default function HomeScreen() {
         <View style={{ width: screenwidth - 150, height: 60 }}>
           <Image source={namelogo} style={{ flex: 1 }} contentFit="contain" />
           <ThemedText style={{ marginTop: -10, color: "#a1a1a1" }}>
-            {user.sites.length} site key{user.sites.length === 1 ? "" : "s"}{" "}
-            secure
+            {user.sites.length} key{user.sites.length === 1 ? "" : "s"} secure
           </ThemedText>
         </View>
 
-        <Pressable onPress={signOut}>
+        <Pressable onPress={() => router.push("/dashboard/profile")}>
           <ImageContain source={profileImg} size={40} />
         </Pressable>
       </View>
@@ -134,13 +135,13 @@ export default function HomeScreen() {
         }}
       >
         <Search
-          placeholder="Search site"
+          placeholder="Search"
           style={{ paddingHorizontal: 10, zIndex: 1, flex: 1 }}
           setValue={setSearchValue}
           value={searchValue}
         />
 
-        <ThinThemedButton text={"Add site"} onPress={openNewSite} />
+        <ThinThemedButton text={"Add entry"} onPress={openNewSite} />
       </View>
 
       {/* Sites */}

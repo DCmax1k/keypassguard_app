@@ -81,6 +81,7 @@ export default function AddSite() {
   const [username, setUsername] = useState(site.username);
   const [password, setPassword] = useState("");
   const [note, setNote] = useState(site.note);
+  const [siteId, setSiteId] = useState(site.id);
 
   const cancelEdits = () => {
     // Set back data, set decrypted false, set edit mode false
@@ -88,6 +89,7 @@ export default function AddSite() {
     setUsername(site.username);
     setPassword("");
     setNote(site.note);
+    setSiteId(site.id);
     setDecrypted(false);
     setEditMode(false);
     // Hide Password because should be encrypted again
@@ -125,8 +127,10 @@ export default function AddSite() {
 
   const handleSave = async () => {
     // Upload all current data to db and if success set edit mode false
+    console.log("site id: ", site.id);
+    console.log("after change, site id: ", siteId);
     const newSite = {
-      id: site.id,
+      id: siteId,
       name,
       username,
       password,
@@ -137,13 +141,14 @@ export default function AddSite() {
       showAlert(response.message, false);
       return;
     }
-    if (!site.id) {
+    if (!siteId) {
       const userSites = user.sites;
       userSites.push(response.site);
       updateUser({ sites: userSites });
+      setSiteId(response.site.id);
     } else {
       const ind = user.sites.findIndex((s: any) => {
-        return s.id === site.id;
+        return s.id === siteId;
       });
       if (ind > -1) {
         const newSites = user.sites;
@@ -161,28 +166,32 @@ export default function AddSite() {
   const fetchDecrypt = async () => {
     // Get new password and set it to state
     if (!decrypted) {
-      if (!site.id) {
+      if (!siteId) {
         setPassword("");
         setDecrypted(true);
         return "";
       }
-      const response = await sendData("/dashboard/requestdecrypt", {
-        site: { id: site.id },
-      });
-      if (response.status !== "success") {
-        showAlert(response.message, false);
+      try {
+        const response = await sendData("/dashboard/requestdecrypt", {
+          site: { id: siteId },
+        });
+        if (response.status !== "success") {
+          showAlert(response.message, false);
+          return "";
+        }
+        const decryptPass = atob(response.data);
+        setPassword(decryptPass);
+        setDecrypted(true);
+        return decryptPass;
+      } catch (err) {
+        showAlert("An error occured, please try again later.", false);
         return "";
       }
-      const decryptPass = atob(response.data);
-      setPassword(decryptPass);
-      setDecrypted(true);
-      return decryptPass;
     }
     return password;
   };
 
   const trashSite = async () => {
-    const siteId = site.id;
     const response = await sendData("/dashboard/deletesite", {
       site: { id: siteId },
     });
@@ -231,13 +240,13 @@ export default function AddSite() {
     showAlert("Copied to clipboard!", true);
   };
 
-  const scrollRef = useRef<KeyboardAwareScrollView>(null);
-  const scrollToInput = (reactNode: any) => {
-    if (scrollRef.current && reactNode) {
-      // This is the package's internal scroll injection method
-      scrollRef.current.scrollToFocusedInput(reactNode);
-    }
-  };
+  // const scrollRef = useRef<KeyboardAwareScrollView>(null);
+  // const scrollToInput = (reactNode: any) => {
+  //   if (scrollRef.current && reactNode) {
+  //     // This is the package's internal scroll injection method
+  //     scrollRef.current.scrollToFocusedInput(reactNode);
+  //   }
+  // };
 
   return (
     <ThemedView
@@ -330,7 +339,7 @@ export default function AddSite() {
       {/* Body */}
 
       <KeyboardAwareScrollView
-        ref={scrollRef}
+        // ref={scrollRef}
         style={{
           flex: 1,
           marginBottom: -50,
@@ -339,8 +348,7 @@ export default function AddSite() {
         keyboardShouldPersistTaps="handled"
         enableOnAndroid={true}
         enableAutomaticScroll={true}
-        extraScrollHeight={120} // 2. Increase from 20/50 to 120 (adds explicit padding above the keyboard layout)
-        extraHeight={180} // 3. Tells the calculation engine to lift elements even higher
+        extraScrollHeight={20} // 2. Increase from 20/50 to 120 (adds explicit padding above the keyboard layout)
         showsVerticalScrollIndicator={false}
       >
         <Spacer height={10} />
@@ -407,7 +415,7 @@ export default function AddSite() {
           locked={!editMode}
           copy={true}
           copyCallback={() => copyToClipboard(note)}
-          onFocus={(event: any) => scrollToInput(event.target)}
+          // onFocus={(event: any) => scrollToInput(event.target)}
         />
       </KeyboardAwareScrollView>
     </ThemedView>

@@ -130,7 +130,7 @@ function RootLayoutNav() {
       <Provider>
         <ThemedView style={{ flex: 1 }}>
           <AlertNotification ref={alertRef} />
-          <Stack>
+          <Stack screenOptions={{}}>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="dashboard" options={{ headerShown: false }} />
             <Stack.Screen
