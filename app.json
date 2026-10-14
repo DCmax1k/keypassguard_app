@@ -2,7 +2,7 @@
   "expo": {
     "name": "KeypassGuard",
     "slug": "KeypassGuard_App",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/ios-light.png",
     "scheme": "keypassguardapp",
@@ -29,13 +29,12 @@
         "backgroundColor": "#051923"
       },
       "package": "com.caldwell.keypassguard",
-      "versionCode": 1,
+      "versionCode": 3,
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.CAMERA",
-        "com.android.vending.BILLING"
+        "android.permission.CAMERA"
       ]
     },
     "plugins": [
@@ -45,7 +44,13 @@
       "expo-image",
       "expo-splash-screen",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.379288000176-pfttrjo0a62mlcgghmfgaa3fjtsru5s8"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -55,6 +60,12 @@
       "eas": {
         "projectId": "5b62dacb-2df3-4bd7-a10a-5eb883125876"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5b62dacb-2df3-4bd7-a10a-5eb883125876"
     }
   }
 }

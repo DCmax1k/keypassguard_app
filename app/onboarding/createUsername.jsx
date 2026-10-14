@@ -2,20 +2,21 @@ import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    Dimensions,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AlertNotification from "../../components/AlertNotification";
 import Spacer from "../../components/Spacer";
 import ThemedTextInput from "../../components/ThemedTextInput";
 import ThemedView from "../../components/ThemedView";
+import Colors from "../../constants/Colors";
 import { useUserStore } from "../../stores/useUserStore";
 import sendData from "../../util/server/sendData";
 import { generateUniqueId } from "../../util/uniqueId";
@@ -24,11 +25,9 @@ const isExpoGo = Constants.executionEnvironment === "storeClient";
 
 let GoogleSignin = null;
 
-// if (!isExpoGo) {
-//   ({
-//     GoogleSignin,
-//   } = require("@react-native-google-signin/google-signin"));
-// }
+if (!isExpoGo) {
+  ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+}
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -68,41 +67,32 @@ const CreateUsernamePage = () => {
     if (username.length === 0) return;
     setLoading(true);
     /////////////////////////////////// can remove this check username section at some point
-    const check = await checkUsername();
-    if (!check) {
-      return;
-    }
+    // const check = await checkUsername();
+    // if (!check) {
+    //   return;
+    // }
     // The create username also checks for username
     const response = await sendData("/login/createusername", {
       jsonWebToken,
       username,
     });
     if (response.status !== "success") {
+      console.log(response);
       setLoading(false);
       alertRef.current.showAlert(response.message, false);
       return;
     }
     const userInfo = response.userInfo;
     const newUser = {
-      _id: generateUniqueId(),
+      localId: generateUniqueId(),
       username: userInfo.username,
       email: userInfo.email,
-      dbId: userInfo.dbId,
+      _id: userInfo.dbId,
       jsonWebToken: jsonWebToken,
     };
     setUser(newUser);
-    updateOptions({ animateDashboard: true });
+    //updateOptions({ animateDashboard: true });
     router.replace("/dashboard");
-  };
-
-  // Not using yet but may be moved to profile to actually sign out google user
-  const signOut = async () => {
-    try {
-      await GoogleSignin.signOut();
-      // setUser(null);
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   return (
@@ -124,7 +114,7 @@ const CreateUsernamePage = () => {
 
               <Text
                 style={{
-                  color: "#6684FF",
+                  color: Colors.primaryAccent,
                   fontSize: 30,
                   fontFamily: "Bals-Bold",
                 }}
@@ -162,12 +152,12 @@ const CreateUsernamePage = () => {
 
                 <Spacer />
 
-                {/* Big blue button */}
+                {/* Big button */}
                 <Pressable
                   onPress={signup}
                   style={{
                     height: 80,
-                    backgroundColor: "#6684FF",
+                    backgroundColor: Colors.primaryAccent,
                     width: "100%",
                     borderRadius: 10,
                     justifyContent: "center",
@@ -193,7 +183,7 @@ const CreateUsernamePage = () => {
                 <Pressable style={{ marginLeft: 5 }} onPress={goBack}>
                   <Text
                     style={{
-                      color: "#8FA6FF",
+                      color: Colors.primaryAccent,
                       fontSize: 13,
                       fontFamily: "DoppioOne-Regular",
                     }}

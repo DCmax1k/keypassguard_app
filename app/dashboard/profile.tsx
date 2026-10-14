@@ -8,22 +8,23 @@ import TitleWithBack from "@/components/TitleWithBack";
 import { DOMAIN } from "@/constants/ServerConstants";
 import { AppContext } from "@/context/AppContext";
 import { useUserStore } from "@/stores/useUserStore";
+import sendData from "@/util/server/sendData";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import Animated, {
-    FadeInUp,
-    FadeOut,
-    LinearTransition,
+  FadeInUp,
+  FadeOut,
+  LinearTransition,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -32,12 +33,73 @@ const Profile = () => {
   const insets = useSafeAreaInsets();
 
   const user = useUserStore((store) => store.user);
+  const updateUser = useUserStore((store) => store.updateUser);
 
   //   Inputs
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  const saveNewUsername = async () => {
+    if (username.length <= 0)
+      return showAlert("Please enter a username", false);
+    if (username === user.username)
+      return showAlert("Please enter a different username");
+    const response = await sendData("/dashboard/changeusername", {
+      newValue: username,
+      jsonWebToken: user.jsonWebToken,
+    });
+    if (response.status !== "success") {
+      return showAlert(response.message, false);
+    }
+    updateUser({ username });
+  };
+  const saveNewEmail = async () => {
+    if (email.length <= 0) return showAlert("Please enter an email", false);
+    if (email === user.email)
+      return showAlert("Please enter a different email");
+    const response = await sendData("/dashboard/changeemail", {
+      newValue: email,
+      jsonWebToken: user.jsonWebToken,
+    });
+    if (response.status !== "success") {
+      return showAlert(response.message, false);
+    }
+    updateUser({
+      email,
+      settings: { emailVerified: false, emailChanged: Date.now() },
+    });
+  };
+  const saveNewPassword = async () => {
+    const newValue = newPassword;
+    try {
+      const response = await sendData("/login/changepassword", {
+        password,
+        newValue,
+        jsonWebToken: user.jsonWebToken,
+      });
+      if (response.status === "success") {
+        showAlert("Password successfully changed.", true);
+      } else {
+        showAlert(response.message, false);
+      }
+      setPassword("");
+      setNewPassword("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const requestResendVerification = async () => {
+    const response = await sendData("/dashboard/resendemail", {
+      jsonWebToken: user.jsonWebToken,
+    });
+    if (response.status === "success") {
+      showAlert("Email sent.", true);
+    } else {
+      showAlert(response.message, false);
+    }
+  };
 
   const handleOpenBrowser = async (url: string) => {
     console.log("Attempting to open browser...");
@@ -72,6 +134,7 @@ const Profile = () => {
           style={{ paddingTop: insets.top }}
           contentContainerStyle={{ paddingBottom: 120 }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <TitleWithBack
             style={undefined}
@@ -163,10 +226,10 @@ const Profile = () => {
                   borderRadius: 10,
                 }}
               />
-              {user.username !== username && (
+              {user.username !== username && username.length >= 1 && (
                 <Animated.View entering={FadeInUp} exiting={FadeOut}>
                   <Pressable
-                    onPress={() => console.log("Save username")}
+                    onPress={saveNewUsername}
                     style={{
                       backgroundColor: "#1e70bc",
                       alignSelf: "flex-end",
@@ -206,7 +269,7 @@ const Profile = () => {
               {user.email !== email && (
                 <Animated.View>
                   <Pressable
-                    onPress={() => console.log("Save email")}
+                    onPress={saveNewEmail}
                     style={{
                       backgroundColor: "#1e70bc",
                       alignSelf: "flex-end",
@@ -233,7 +296,7 @@ const Profile = () => {
                 safeguard your valuable KeypassGuard account.{" "}
                 {/* <Pressable onPress={() => console.log("Resend")}> */}
                 <ThemedText
-                  onPress={() => console.log("Resend")}
+                  onPress={requestResendVerification}
                   style={{
                     color: "#1e70bc",
                     textDecorationLine: "underline",
@@ -290,7 +353,7 @@ const Profile = () => {
               {newPassword.length >= 8 && newPassword !== password && (
                 <Animated.View entering={FadeInUp} exiting={FadeOut}>
                   <Pressable
-                    onPress={() => console.log("Save password")}
+                    onPress={saveNewPassword}
                     style={{
                       backgroundColor: "#1e70bc",
                       alignSelf: "flex-end",

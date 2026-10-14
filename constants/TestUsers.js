@@ -59,12 +59,12 @@ const USER = {
 
   // Only local not in live db
 
-  disclaimers: {
-    // by default start as true
-    progress: true, // Initial progress page showing disclaimer
-    aiScan: true, // when click ai
-    profileImg: true,
-  },
+  // disclaimers: {
+  //   // by default start as true
+  //   progress: true, // Initial progress page showing disclaimer
+  //   aiScan: true, // when click ai
+  //   profileImg: true,
+  // },
   missedHttpResponses: [], // [{endpoint, data}];
 };
 

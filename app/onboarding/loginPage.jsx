@@ -166,7 +166,7 @@ const LoginPage = () => {
                   fontFamily: "Exo2-ExtraLight",
                 }}
               >
-                Please login to continue using Pumped Up.
+                Please login to continue using Keypass Guard.
               </Text>
 
               <Spacer height={20} />

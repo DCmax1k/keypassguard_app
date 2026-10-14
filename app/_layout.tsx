@@ -6,6 +6,7 @@ import ImageContain from "@/components/ImageContain";
 import Colors from "@/constants/Colors";
 import { AppContext } from "@/context/AppContext";
 import { useUserStore } from "@/stores/useUserStore";
+import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -16,6 +17,14 @@ import { Portal, Provider } from "react-native-paper";
 import "react-native-reanimated";
 import Animated, { FadeOutDown, SlideInDown } from "react-native-reanimated";
 import ThemedView from "../components/ThemedView";
+
+const isExpoGo = Constants.executionEnvironment === "storeClient";
+
+let GoogleSignin: any = null;
+
+if (!isExpoGo) {
+  ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+}
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,13 +64,13 @@ function RootLayoutNav() {
 
   const signOut = async () => {
     try {
-      // if (GoogleSignin) {
-      //   const isSignedIn = await GoogleSignin.getCurrentUser();
-      //   // console.log("issignedin", isSignedIn);
-      //   if (isSignedIn) {
-      //     await GoogleSignin.signOut();
-      //   }
-      // }
+      if (GoogleSignin) {
+        const isSignedIn = await GoogleSignin.getCurrentUser();
+        // console.log("issignedin", isSignedIn);
+        if (isSignedIn) {
+          await GoogleSignin.signOut();
+        }
+      }
       await SecureStore.deleteItemAsync("user_refresh_token");
     } catch (error) {
       console.error(error);

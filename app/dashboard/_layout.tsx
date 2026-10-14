@@ -13,7 +13,7 @@ import sendData from "../../util/server/sendData";
 export default function DashboardLayout() {
   const user = useUserStore((state: any) => state.user);
   const users = useUserStore((state: any) => state.users);
-  const updateUser = useUserStore((state: any) => state.updateUser);
+  const updateOptions = useUserStore((state: any) => state.updateOptions);
   const setUser = useUserStore((state: any) => state.setUser);
   const { signOut } = React.useContext(AppContext);
   const [authenticated, setAuthenticated] = useState(false);
@@ -27,18 +27,20 @@ export default function DashboardLayout() {
 
   const updateUserData = (authResponse: any) => {
     const { userInfo } = authResponse;
-    // Find user in users and set
-    const localUserIds = Object.keys(users);
-    const idx = localUserIds.findIndex(
-      (localId) => users[localId]._id === userInfo._id,
-    );
+    // Find user in users and set - DONT USE USERS ANYMORE
+    // const localUserIds = Object.keys(users);
+    // const idx = localUserIds.findIndex(
+    //   (localId) => users[localId]._id === userInfo._id,
+    // );
 
-    if (idx > -1) {
-      let userToSet;
-      const localU = users[localUserIds[idx]];
-      userToSet = { ...localU, ...userInfo };
-      setUser(userToSet);
-    }
+    // if (idx > -1) {
+    //   let userToSet;
+    //   const localU = users[localUserIds[idx]];
+    //   userToSet = { ...localU, ...userInfo };
+    //   setUser(userToSet);
+    // }
+    let userToSet = { ...user, ...userInfo };
+    setUser(userToSet);
   };
 
   // useEffect(() => {

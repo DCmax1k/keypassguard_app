@@ -143,7 +143,7 @@ const SignUpPage = () => {
                   fontFamily: "Exo2-ExtraLight",
                 }}
               >
-                Create an account to start crushing your workouts!
+                Create an account to start securing your passwords!
               </Text>
               <Spacer height={20} />
 

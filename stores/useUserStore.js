@@ -32,7 +32,7 @@ export const useUserStore = create((set, get) => {
   const initialState = {
     options: {
       loading: false,
-      showOnboarding: false, // Still need to Add onboarding screens
+      showOnboarding: true,
     },
     user: null,
     users: {},

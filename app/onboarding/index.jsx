@@ -1,7 +1,17 @@
+// import {
+//   GoogleSignin,
+//   isErrorWithCode,
+//   isSuccessResponse,
+//   statusCodes,
+// } from "@react-native-google-signin/google-signin";
+import * as AppleAuthentication from "expo-apple-authentication";
+import Constants from "expo-constants";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,18 +20,16 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import womanlock from "../../assets/graphics/womanlock.png";
-import Spacer from "../../components/Spacer";
-import ThemedView from "../../components/ThemedView";
-import { useUserStore } from "../../stores/useUserStore";
-// import { GoogleSignin, isSuccessResponse, isErrorWithCode, statusCodes } from '@react-native-google-signin/google-signin';
-import Constants from "expo-constants";
+import appleIconWhite from "../../assets/onboarding/appleIconWhite.png";
+import googleIcon from "../../assets/onboarding/googleIcon.png";
 import AlertNotification from "../../components/AlertNotification";
 import ImageContain from "../../components/ImageContain";
+import Spacer from "../../components/Spacer";
+import ThemedView from "../../components/ThemedView";
 import Colors from "../../constants/Colors";
+import { useUserStore } from "../../stores/useUserStore";
 import auth from "../../util/server/auth";
 import sendData from "../../util/server/sendData";
-import { generateUniqueId } from "../../util/uniqueId";
-//import * as AppleAuthentication from 'expo-apple-authentication';
 
 const isExpoGo = Constants.executionEnvironment === "storeClient";
 
@@ -30,15 +38,14 @@ let isSuccessResponse = null;
 let isErrorWithCode = null;
 let statusCodes = null;
 
-// ADD WHEN ADDING GOOGLE SIGN IN
-// if (!isExpoGo) {
-//   ({
-//     GoogleSignin,
-//     isSuccessResponse,
-//     isErrorWithCode,
-//     statusCodes
-//   } = require("@react-native-google-signin/google-signin"));
-// }
+if (!isExpoGo) {
+  ({
+    GoogleSignin,
+    isSuccessResponse,
+    isErrorWithCode,
+    statusCodes,
+  } = require("@react-native-google-signin/google-signin"));
+}
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -55,16 +62,17 @@ const OnboardingIndex = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
 
-  // ADD FOR GOOGLE SIGN IN
   // Login automatically
-  // useEffect(() => {
-  //     if (isExpoGo || !GoogleSignin) return;
-  //     GoogleSignin.configure({
-  //         webClientId: '483624646164-7ckn41ljobh2p7cv4ig3ni4hg1s6e77o.apps.googleusercontent.com',
-  //         iosClientId: "483624646164-htf0lctbmvq9cqm4vbi0t6vkk2v8f1rt.apps.googleusercontent.com",
-  //         profileImageSize: 120,
-  //     });
-  // }, []);
+  useEffect(() => {
+    if (isExpoGo || !GoogleSignin) return;
+    GoogleSignin.configure({
+      webClientId:
+        "379288000176-g8o27grgrv03sv0oqp220bfhbkfrpdvs.apps.googleusercontent.com",
+      iosClientId:
+        "379288000176-pfttrjo0a62mlcgghmfgaa3fjtsru5s8.apps.googleusercontent.com",
+      profileImageSize: 120,
+    });
+  }, []);
 
   const alertRef = useRef(null);
 
@@ -77,7 +85,7 @@ const OnboardingIndex = () => {
 
   const loginThirdPartyCredentials = async (data) => {
     try {
-      const loginThirdParty = await sendData("/login/newloginthirdparty", data);
+      const loginThirdParty = await sendData("/login/loginthirdparty", data);
       if (loginThirdParty.status !== "success") {
         alertRef.current.showAlert(loginThirdParty.message, false);
         setAppleLoading(false);
@@ -95,7 +103,7 @@ const OnboardingIndex = () => {
         return;
       }
       // Check username
-      const { userInfo, fullLocalUser } = authResponse;
+      const { userInfo } = authResponse;
       // If no username, send jsonWebToken with data to createUsername
       const { username } = userInfo;
       if (!username) {
@@ -107,49 +115,16 @@ const OnboardingIndex = () => {
           },
         });
       }
-      // If username, login user. Check if local user to use first
-      const localUserIds = Object.keys(users || {});
-      const idx = localUserIds.findIndex(
-        (localId) => users[localId]?.dbId === userInfo.dbId,
-      );
 
       let userToSet;
-      try {
-        if (idx > -1) {
-          // Local user found
-          userToSet = {
-            ...users[localUserIds[idx]],
-            ...userInfo,
-            jsonWebToken,
-          };
-        } else {
-          // 5. Check fullLocalUser before accessing _id
-          if (!fullLocalUser || !fullLocalUser._id) {
-            alertRef.current.showAlert(
-              "Error: fullLocalUser or its ID is missing",
-              false,
-            );
-            return;
-          }
-          const dbId = fullLocalUser._id;
-          const newLocalUser = {
-            ...fullLocalUser,
-            _id: generateUniqueId(),
-            dbId,
-            jsonWebToken,
-          };
-          userToSet = newLocalUser;
-        }
 
-        setUser(userToSet);
-        updateOptions({ animateDashboard: true });
-        router.replace("/dashboard");
-      } catch (e) {
-        alertRef.current.showAlert(
-          "Crash during User State Mapping: " + e.message,
-          false,
-        );
-      }
+      userToSet = {
+        ...userInfo,
+        jsonWebToken,
+      };
+
+      setUser(userToSet);
+      router.replace("/dashboard");
     } catch (err) {
       console.error(err);
     }
@@ -296,18 +271,62 @@ const OnboardingIndex = () => {
 
             {/* Third party logins */}
             <View style={{ alignItems: "center" }}>
-              {/* <Pressable onPress={handleGoogleSignIn} style={{backgroundColor: "white", flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 999999}}>
-                                <Image style={{height: 30, width: 30, marginRight: 15, objectFit: "contain"}} source={googleIcon} />
-                                <Text style={{fontSize: 17}}>{googleLoading ? "Signing in..." : "Sign in with Google"}</Text>
-                            </Pressable> */}
-
-              {/* {Platform.OS === "ios" && <Pressable onPress={handleAppleSignIn} style={{backgroundColor: "black", flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 999999, borderColor: "white", borderWidth: 1}}>
-                                <Image style={{height: 35, width: 35, marginRight: 15, objectFit: "contain"}} source={appleIconWhite} />
-                                <Text style={{fontSize: 17, color: "white"}}>{appleLoading ? "Signing in...":"Sign in with Apple"}</Text>
-                            </Pressable>} */}
+              <Pressable
+                onPress={handleGoogleSignIn}
+                style={{
+                  backgroundColor: "white",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingVertical: 10,
+                  paddingHorizontal: 20,
+                  borderRadius: 999999,
+                }}
+              >
+                <Image
+                  style={{
+                    height: 30,
+                    width: 30,
+                    marginRight: 15,
+                    objectFit: "contain",
+                  }}
+                  source={googleIcon}
+                />
+                <Text style={{ fontSize: 17 }}>
+                  {googleLoading ? "Signing in..." : "Sign in with Google"}
+                </Text>
+              </Pressable>
+              <Spacer height={20} />
+              {Platform.OS === "ios" && (
+                <Pressable
+                  onPress={handleAppleSignIn}
+                  style={{
+                    backgroundColor: "black",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    borderRadius: 999999,
+                    borderColor: "white",
+                    borderWidth: 1,
+                  }}
+                >
+                  <Image
+                    style={{
+                      height: 35,
+                      width: 35,
+                      marginRight: 15,
+                      objectFit: "contain",
+                    }}
+                    source={appleIconWhite}
+                  />
+                  <Text style={{ fontSize: 17, color: "white" }}>
+                    {appleLoading ? "Signing in..." : "Sign in with Apple"}
+                  </Text>
+                </Pressable>
+              )}
             </View>
-
-            <Spacer />
 
             <View style={{ alignItems: "center" }}>
               <Text
