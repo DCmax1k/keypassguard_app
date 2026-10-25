@@ -12,11 +12,25 @@ import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
-import { Keyboard, Platform, Pressable, View } from "react-native";
+import { Keyboard, LogBox, Platform, Pressable, View } from "react-native";
 import { Portal, Provider } from "react-native-paper";
 import "react-native-reanimated";
 import Animated, { FadeOutDown, SlideInDown } from "react-native-reanimated";
 import ThemedView from "../components/ThemedView";
+
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (
+    typeof args[0] === "string" &&
+    args[0].includes("Dependencies should only be used on the web")
+  ) {
+    return; // Suppress this specific warning log
+  }
+  originalWarn(...args);
+};
+
+// Standard LogBox fallback
+LogBox.ignoreAllLogs(false);
 
 const isExpoGo = Constants.executionEnvironment === "storeClient";
 
@@ -85,13 +99,6 @@ function RootLayoutNav() {
     alertRef.current?.showAlert(message, good);
   };
 
-  const appContextValue = {
-    showAlert,
-    setShowDisconnectIndicator: (value: boolean) =>
-      updateOptions({ showDisconnectIndicator: value }),
-    signOut,
-  };
-
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   useEffect(() => {
@@ -130,6 +137,13 @@ function RootLayoutNav() {
       changeSub.remove();
     };
   }, []);
+
+  const appContextValue = {
+    showAlert,
+    setShowDisconnectIndicator: (value: boolean) =>
+      updateOptions({ showDisconnectIndicator: value }),
+    signOut,
+  };
 
   let keyboardDismissButtonStayActive = true;
   // Logic to prevent it if needed here

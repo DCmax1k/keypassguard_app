@@ -1,5 +1,4 @@
 import * as Haptics from "expo-haptics";
-import React from "react";
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import { Portal } from "react-native-paper";
 import Animated, {
@@ -12,6 +11,43 @@ import Colors from "../constants/Colors";
 import Spacer from "./Spacer";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+// USE THIS TO USE IN OTHER FILES:
+
+// const [confirmMenuActive, setConfirmMenuActive] = useState(false);
+// const [confirmMenuData, setConfirmMenuData] = useState({
+//   title: "The title",
+//   subTitle: "The description for the confirmation",
+//   subTitle2: "Another one here",
+//   option1: "Update",
+//   option3: "Another option",
+//   option3color: "#000",
+//   option3onPress: () => {},
+//   option1color: "",
+//   option2: "Cancel",
+//   confirm: () => {},
+// });
+
+// setConfirmMenuData({
+//   title: "Delete site",
+//   subTitle: "Remove all data associated with this site record?",
+//   subTitle2: "This action cannot be undone.",
+//   option1: "Confirm Delete",
+//   option1color: "#000",
+//   option3: "",
+//   option3onPress: () => {},
+//   option2: "Cancel",
+//   confirm: () => {
+
+//   },
+// });
+// setConfirmMenuActive(true);
+
+// <ConfirmMenu
+//       active={confirmMenuActive}
+//       setActive={setConfirmMenuActive}
+//       data={confirmMenuData}
+//     />
 
 const ConfirmMenu = ({ style = {}, active, setActive, data, ...props }) => {
   const closeAndConfirm = () => {

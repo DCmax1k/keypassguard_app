@@ -115,7 +115,7 @@ export default function DashboardLayout() {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
       if (
-        appState.current.match(/inactive|background/) &&
+        appState.current?.match(/inactive|background/) &&
         nextState === "active"
       ) {
         console.log("📲 App has come back to foreground!");

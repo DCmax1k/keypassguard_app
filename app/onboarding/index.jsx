@@ -8,6 +8,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
@@ -23,11 +24,13 @@ import womanlock from "../../assets/graphics/womanlock.png";
 import appleIconWhite from "../../assets/onboarding/appleIconWhite.png";
 import googleIcon from "../../assets/onboarding/googleIcon.png";
 import AlertNotification from "../../components/AlertNotification";
+import ConfirmMenu from "../../components/ConfirmMenu";
 import ImageContain from "../../components/ImageContain";
 import Spacer from "../../components/Spacer";
 import ThemedView from "../../components/ThemedView";
 import Colors from "../../constants/Colors";
 import { useUserStore } from "../../stores/useUserStore";
+import { useBiometricLabel } from "../../util/authBiometrics";
 import auth from "../../util/server/auth";
 import sendData from "../../util/server/sendData";
 
@@ -62,6 +65,19 @@ const OnboardingIndex = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
 
+  const [confirmMenuActive, setConfirmMenuActive] = useState(false);
+  const [confirmMenuData, setConfirmMenuData] = useState({
+    title: "The title",
+    subTitle: "The description for the confirmation",
+    subTitle2: "Another one here",
+    option1: "Update",
+    option1color: "",
+    option3: "No",
+    option3onPress: () => {},
+    option2: "Go back",
+    confirm: () => {},
+  });
+
   // Login automatically
   useEffect(() => {
     if (isExpoGo || !GoogleSignin) return;
@@ -92,6 +108,14 @@ const OnboardingIndex = () => {
         return;
       }
       const { jsonWebToken } = loginThirdParty;
+      // Hardware login setup
+      if (data.hardwareLogin) {
+        //console.log("Setting refresh token");
+        const { refresh_token } = loginThirdParty;
+        await SecureStore.setItemAsync("user_refresh_token", refresh_token);
+      } else {
+        await SecureStore.setItemAsync("user_refresh_token", "");
+      }
       // Check auth
       const authResponse = await auth(jsonWebToken);
       if (authResponse.status !== "success") {
@@ -130,7 +154,7 @@ const OnboardingIndex = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (biometrics = false) => {
     if (isExpoGo || !GoogleSignin) return;
     try {
       setGoogleLoading(true);
@@ -147,6 +171,7 @@ const OnboardingIndex = () => {
           partyType: "google",
           idToken,
           email,
+          hardwareLogin: biometrics,
         };
         await loginThirdPartyCredentials(data);
       } else {
@@ -181,7 +206,7 @@ const OnboardingIndex = () => {
     setGoogleLoading(false);
   };
 
-  const handleAppleSignIn = async () => {
+  const handleAppleSignIn = async (biometrics = false) => {
     try {
       setAppleLoading(true);
       // Ping my server to ensure its operating
@@ -206,6 +231,7 @@ const OnboardingIndex = () => {
         partyType: "apple",
         idToken: credential.identityToken,
         email: credential.email,
+        hardwareLogin: biometrics,
       };
       await loginThirdPartyCredentials(data);
     } catch (e) {
@@ -223,6 +249,50 @@ const OnboardingIndex = () => {
     setAppleLoading(false);
   };
 
+  const biometricLabel = useBiometricLabel();
+  // Ask about sign in with biometrics for third party login
+  const askBiometricsGoogle = () => {
+    // Confirm
+    setConfirmMenuData({
+      title: biometricLabel + "?",
+      subTitle: `Use ${biometricLabel} to sign in?`,
+      subTitle2: "",
+      option1: "Yes",
+      option1color: Colors.primaryAccent,
+      option3: "No",
+      option3color: "#7D4747",
+      option3onPress: () => {
+        handleGoogleSignIn();
+      },
+      option2: "Go back",
+      confirm: () => {
+        handleGoogleSignIn(true); // Use biometrics true
+      },
+    });
+    setConfirmMenuActive(true);
+  };
+
+  const askBiometricsApple = () => {
+    // Confirm
+    setConfirmMenuData({
+      title: biometricLabel + "?",
+      subTitle: `Use ${biometricLabel} to sign in?`,
+      subTitle2: "",
+      option1: "Yes",
+      option1color: Colors.primaryAccent,
+      option3: "No",
+      option3color: "#7D4747",
+      option3onPress: () => {
+        handleAppleSignIn();
+      },
+      option2: "Go back",
+      confirm: () => {
+        handleAppleSignIn(true); // Use biometrics true
+      },
+    });
+    setConfirmMenuActive(true);
+  };
+
   //return;
   // user ? (
   //   <Redirect href={"/dashboard"} />
@@ -230,6 +300,11 @@ const OnboardingIndex = () => {
   return (
     <ThemedView style={{ flex: 1, height: screenHeight, width: screenWidth }}>
       <AlertNotification ref={alertRef} />
+      <ConfirmMenu
+        active={confirmMenuActive}
+        setActive={setConfirmMenuActive}
+        data={confirmMenuData}
+      />
       <View style={{ flex: 1, paddingTop: insets.top }}>
         <ScrollView
           style={{ flex: 1, padding: 30 }}
@@ -272,7 +347,7 @@ const OnboardingIndex = () => {
             {/* Third party logins */}
             <View style={{ alignItems: "center" }}>
               <Pressable
-                onPress={handleGoogleSignIn}
+                onPress={askBiometricsGoogle}
                 style={{
                   backgroundColor: "white",
                   flexDirection: "row",
@@ -299,7 +374,7 @@ const OnboardingIndex = () => {
               <Spacer height={20} />
               {Platform.OS === "ios" && (
                 <Pressable
-                  onPress={handleAppleSignIn}
+                  onPress={askBiometricsApple}
                   style={{
                     backgroundColor: "black",
                     flexDirection: "row",

@@ -3,7 +3,7 @@ import auth from "@/util/server/auth";
 import { generateUniqueId } from "@/util/uniqueId";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Loading from "../components/Loading";
 import ThemedView from "../components/ThemedView";
@@ -27,7 +27,7 @@ const RootIndex = () => {
       // Auto login if user
       if (!user) {
         await SecureStore.setItemAsync("user_refresh_token", "");
-        return router.replace("/onboarding");
+        //return router.replace("/onboarding"); // Runs twice when logging out. Runs at the bottom anyway
       }
       const checkBio = await authenticateWithBiometrics();
 
@@ -59,6 +59,7 @@ const RootIndex = () => {
         // updateOptions({ animateDashboard: true });
         router.replace("/dashboard");
       } else {
+        console.log(checkBio);
         await SecureStore.setItemAsync("user_refresh_token", "");
         return router.replace("/onboarding");
       }

@@ -1,10 +1,12 @@
 import greenlock from "@/assets/graphics/greenlock.svg";
 import exportImg from "@/assets/icons/export.svg";
+import ConfirmMenu from "@/components/ConfirmMenu";
 import ImageContain from "@/components/ImageContain";
 import Spacer from "@/components/Spacer";
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import TitleWithBack from "@/components/TitleWithBack";
+import Colors from "@/constants/Colors";
 import { DOMAIN } from "@/constants/ServerConstants";
 import { AppContext } from "@/context/AppContext";
 import { useUserStore } from "@/stores/useUserStore";
@@ -40,6 +42,22 @@ const Profile = () => {
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  // Delete account
+  const [focusOnDeleteAccount, setFocusOnDeleteAccount] = useState(false);
+
+  const [confirmMenuActive, setConfirmMenuActive] = useState(false);
+  const [confirmMenuData, setConfirmMenuData] = useState({
+    title: "The title",
+    subTitle: "The description for the confirmation",
+    subTitle2: "Another one here",
+    option1: "Update",
+    option1color: "",
+    option3: "No",
+    option3onPress: () => {},
+    option2: "Go back",
+    confirm: () => {},
+  });
 
   const saveNewUsername = async () => {
     if (username.length <= 0)
@@ -121,10 +139,44 @@ const Profile = () => {
     return showAlert("Please verify your email before exporting!", false);
   };
 
+  const handleDeleteAccount = () => {
+    setConfirmMenuData({
+      title: "Delete Account",
+      subTitle: "Remove all data associated with this account?",
+      subTitle2: "This action cannot be undone.",
+      option1: "Confirm Delete",
+      option1color: Colors.bad,
+      option3: "",
+      option3onPress: () => {},
+      option2: "Cancel",
+      confirm: () => {
+        requestDeleteAccount();
+      },
+    });
+    setConfirmMenuActive(true);
+  };
+
+  const requestDeleteAccount = async () => {
+    const response = await sendData("/dashboard/deleteaccount", {
+      jsonWebToken: user.jsonWebToken,
+    });
+    if (response.status === "success") {
+      signOut();
+    } else {
+      showAlert(response.message, false);
+    }
+  };
+
   return (
     <ThemedView
       style={{ flex: 1, alignItems: "center", backgroundColor: "#232323" }}
     >
+      <ConfirmMenu
+        active={confirmMenuActive}
+        setActive={setConfirmMenuActive}
+        data={confirmMenuData}
+      />
+
       {/* <SafeAreaView> */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -368,6 +420,28 @@ const Profile = () => {
               )}
             </View>
           </Animated.View>
+
+          <Spacer />
+          <Spacer />
+          <Spacer />
+
+          <Pressable
+            onPress={() =>
+              focusOnDeleteAccount
+                ? handleDeleteAccount()
+                : setFocusOnDeleteAccount(true)
+            }
+            style={{ width: "100%" }}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: focusOnDeleteAccount ? "#7D4747" : "#5c3333",
+              }}
+            >
+              Delete Account
+            </Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
       {/* </SafeAreaView> */}

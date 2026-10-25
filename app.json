@@ -2,7 +2,7 @@
   "expo": {
     "name": "KeypassGuard",
     "slug": "KeypassGuard_App",
-    "version": "1.0.2",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/ios-light.png",
     "scheme": "keypassguardapp",
@@ -29,7 +29,7 @@
         "backgroundColor": "#051923"
       },
       "package": "com.caldwell.keypassguard",
-      "versionCode": 3,
+      "versionCode": 8,
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
@@ -45,6 +45,15 @@
       "expo-splash-screen",
       "expo-status-bar",
       "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+            }
+        }
+      ],
       [
         "@react-native-google-signin/google-signin",
         {
