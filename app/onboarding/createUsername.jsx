@@ -23,10 +23,17 @@ import { generateUniqueId } from "../../util/uniqueId";
 
 const isExpoGo = Constants.executionEnvironment === "storeClient";
 
-let GoogleSignin = null;
+// let GoogleSignin = null;
 
+// if (!isExpoGo) {
+//   ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+// }
+let GoogleSignin = null;
 if (!isExpoGo) {
-  ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+  try {
+    GoogleSignin =
+      require("@react-native-google-signin/google-signin").GoogleSignin;
+  } catch (e) {}
 }
 
 const screenWidth = Dimensions.get("window").width;

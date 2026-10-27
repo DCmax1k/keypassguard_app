@@ -34,10 +34,18 @@ LogBox.ignoreAllLogs(false);
 
 const isExpoGo = Constants.executionEnvironment === "storeClient";
 
-let GoogleSignin: any = null;
+// let GoogleSignin: any = null;
 
+// if (!isExpoGo) {
+//   ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+// }
+
+let GoogleSignin: any = null;
 if (!isExpoGo) {
-  ({ GoogleSignin } = require("@react-native-google-signin/google-signin"));
+  try {
+    GoogleSignin =
+      require("@react-native-google-signin/google-signin").GoogleSignin;
+  } catch (e) {}
 }
 
 export {

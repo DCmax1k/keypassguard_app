@@ -1,6 +1,7 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import sendData from "./server/sendData";
 
 interface BiometricAuthResult {
@@ -52,8 +53,12 @@ export async function authenticateWithBiometrics(): Promise<BiometricAuthResult>
     }
 
     // 2. Trigger the native Face ID / Touch ID prompt
+    // const biometricResult = await LocalAuthentication.authenticateAsync({
+    //   promptMessage: "Log in securely with Face ID",
+    //   fallbackLabel: "Use Passcode",
+    // });
     const biometricResult = await LocalAuthentication.authenticateAsync({
-      promptMessage: "Log in securely with Face ID",
+      promptMessage: "Log in securely", // Changed from "Face ID"
       fallbackLabel: "Use Passcode",
     });
 
@@ -121,14 +126,34 @@ export function useBiometricLabel() {
       // 1 = FINGERPRINT (Touch ID / Android Fingerprint)
       // 2 = FACIAL_RECOGNITION (Face ID / Android Face Unlock)
       // 3 = IRIS (Android Iris Scan)
-      if (types.includes(2)) {
-        setBiometricName("Face ID");
-      } else if (types.includes(1)) {
-        setBiometricName("Touch ID"); // Or 'Fingerprint' depending on your design preference
-      } else if (types.includes(3)) {
-        setBiometricName("Iris Scan");
+      // if (types.includes(2)) {
+      //   setBiometricName("Face ID");
+      // } else if (types.includes(1)) {
+      //   setBiometricName("Touch ID"); // Or 'Fingerprint' depending on your design preference
+      // } else if (types.includes(3)) {
+      //   setBiometricName("Iris Scan");
+      // } else {
+      //   setBiometricName("Biometrics");
+      // }
+      if (Platform.OS === "ios") {
+        // iOS specific naming
+        if (types.includes(2)) {
+          setBiometricName("Face ID");
+        } else if (types.includes(1)) {
+          setBiometricName("Touch ID");
+        } else {
+          setBiometricName("Biometrics");
+        }
       } else {
-        setBiometricName("Biometrics");
+        // Android often supports BOTH fingerprint and face unlock.
+        // Prioritize Fingerprint if available, since under-display scanners are physical touch.
+        if (types.includes(1)) {
+          setBiometricName("Fingerprint");
+        } else if (types.includes(2)) {
+          setBiometricName("Face Unlock");
+        } else {
+          setBiometricName("Biometrics");
+        }
       }
     }
 

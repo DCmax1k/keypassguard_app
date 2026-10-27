@@ -36,18 +36,25 @@ import sendData from "../../util/server/sendData";
 
 const isExpoGo = Constants.executionEnvironment === "storeClient";
 
-let GoogleSignin = null;
-let isSuccessResponse = null;
-let isErrorWithCode = null;
-let statusCodes = null;
+//let GoogleSignin = null;
+//let isSuccessResponse = null;
+//let isErrorWithCode = null;
+//let statusCodes = null;
+// if (!isExpoGo) {
+//   ({
+//     GoogleSignin,
+//     isSuccessResponse,
+//     isErrorWithCode,
+//     statusCodes
+//   } = require("@react-native-google-signin/google-signin"));
+// }
 
+let GoogleSignin = null;
 if (!isExpoGo) {
-  ({
-    GoogleSignin,
-    isSuccessResponse,
-    isErrorWithCode,
-    statusCodes,
-  } = require("@react-native-google-signin/google-signin"));
+  try {
+    GoogleSignin =
+      require("@react-native-google-signin/google-signin").GoogleSignin;
+  } catch (e) {}
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -155,13 +162,22 @@ const OnboardingIndex = () => {
   };
 
   const handleGoogleSignIn = async (biometrics = false) => {
-    if (isExpoGo || !GoogleSignin) return;
+    if (isExpoGo || !GoogleSignin) {
+      alertRef.current.showAlert(
+        "Google Sign-In is not supported in Expo Go on Android.",
+        false,
+      );
+      return;
+    }
     try {
       setGoogleLoading(true);
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       // debugging - send server the response to display
       //sendData("/debuglog", {response: JSON.stringify(response)});
+      const GoogleSigninModule = require("@react-native-google-signin/google-signin");
+      const { GoogleSignin, isSuccessResponse, isErrorWithCode, statusCodes } =
+        GoogleSigninModule;
 
       if (isSuccessResponse(response)) {
         const { idToken, user } = response.data;

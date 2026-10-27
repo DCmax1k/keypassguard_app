@@ -10,7 +10,7 @@ import Animated, {
 import Colors from "../constants/Colors";
 import Spacer from "./Spacer";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
 
 // USE THIS TO USE IN OTHER FILES:
 

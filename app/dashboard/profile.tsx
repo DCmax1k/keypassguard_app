@@ -201,7 +201,8 @@ const Profile = () => {
             <ImageContain
               source={greenlock}
               size={100}
-              style={{ opacity: 0.5, position: "absolute", top: 0 }}
+              style={{ position: "absolute", top: 0 }}
+              imgStyle={{ opacity: 0.5 }}
             />
             <Spacer height={55} />
             <Text
@@ -268,6 +269,7 @@ const Profile = () => {
                 value={username}
                 onChangeText={(v) => setUsername(v)}
                 placeholder="Username"
+                placeholderTextColor={"#555555"}
                 style={{
                   height: 60,
                   color: "#adadad",
@@ -308,6 +310,7 @@ const Profile = () => {
                 placeholder="Email"
                 value={email}
                 onChangeText={(v) => setEmail(v)}
+                placeholderTextColor={"#555555"}
                 style={{
                   height: 60,
                   color: "#adadad",
@@ -373,6 +376,7 @@ const Profile = () => {
                 secureTextEntry={true}
                 value={password}
                 onChangeText={(v) => setPassword(v)}
+                placeholderTextColor={"#555555"}
                 style={{
                   height: 60,
                   color: "#adadad",
@@ -389,6 +393,7 @@ const Profile = () => {
             <View style={{ gap: 10 }}>
               <TextInput
                 placeholder="New password"
+                placeholderTextColor={"#555555"}
                 secureTextEntry={true}
                 value={newPassword}
                 onChangeText={(v) => setNewPassword(v)}
