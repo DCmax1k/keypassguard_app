@@ -8,7 +8,7 @@ import { AppContext } from "@/context/AppContext";
 import { useUserStore } from "@/stores/useUserStore";
 import Constants from "expo-constants";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
@@ -156,69 +156,79 @@ function RootLayoutNav() {
   let keyboardDismissButtonStayActive = true;
   // Logic to prevent it if needed here
 
-  return (
-    <AppContext.Provider value={appContextValue}>
-      <Provider>
-        <ThemedView style={{ flex: 1 }}>
-          <AlertNotification ref={alertRef} />
-          <Stack screenOptions={{}}>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="dashboard" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="onboarding"
-              options={{
-                headerShown: false,
-                animation: "fade",
-                animationDuration: 200,
-              }}
-            />
-          </Stack>
+  const SingleColorTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: "#051923",
+    },
+  };
 
-          {/* Dismiss Keyboard button */}
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          >
-            <Portal.Host>
-              <Portal>
-                {/* Using absolute position and animated transition */}
-                {keyboardVisible && keyboardDismissButtonStayActive && (
-                  <Animated.View
-                    entering={SlideInDown.springify().damping(90)}
-                    exiting={FadeOutDown.duration(100)}
-                    style={{
-                      position: "absolute",
-                      right: 20,
-                      bottom:
-                        keyboardHeight + (Platform.OS === "ios" ? 10 : 30),
-                      zIndex: 99999999,
-                    }}
-                  >
-                    <Pressable
+  return (
+    <ThemeProvider value={SingleColorTheme as any}>
+      <AppContext.Provider value={appContextValue}>
+        <Provider>
+          <ThemedView style={{ flex: 1 }}>
+            <AlertNotification ref={alertRef} />
+            <Stack screenOptions={{}}>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="onboarding"
+                options={{
+                  headerShown: false,
+                  animation: "fade",
+                  animationDuration: 200,
+                }}
+              />
+            </Stack>
+
+            {/* Dismiss Keyboard button */}
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+            >
+              <Portal.Host>
+                <Portal>
+                  {/* Using absolute position and animated transition */}
+                  {keyboardVisible && keyboardDismissButtonStayActive && (
+                    <Animated.View
+                      entering={SlideInDown.springify().damping(90)}
+                      exiting={FadeOutDown.duration(100)}
                       style={{
-                        paddingVertical: 5,
-                        paddingHorizontal: 10,
-                        backgroundColor: Colors.primaryAccent,
-                        borderRadius: 10,
-                        borderColor: Colors.dark.background,
-                        borderWidth: 2,
+                        position: "absolute",
+                        right: 20,
+                        bottom:
+                          keyboardHeight + (Platform.OS === "ios" ? 10 : 30),
+                        zIndex: 99999999,
                       }}
-                      onPress={() => Keyboard.dismiss()}
                     >
-                      <ImageContain size={30} source={keyboardIcon} />
-                    </Pressable>
-                  </Animated.View>
-                )}
-              </Portal>
-            </Portal.Host>
-          </View>
-        </ThemedView>
-      </Provider>
-    </AppContext.Provider>
+                      <Pressable
+                        style={{
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          backgroundColor: Colors.primaryAccent,
+                          borderRadius: 10,
+                          borderColor: Colors.dark.background,
+                          borderWidth: 2,
+                        }}
+                        onPress={() => Keyboard.dismiss()}
+                      >
+                        <ImageContain size={30} source={keyboardIcon} />
+                      </Pressable>
+                    </Animated.View>
+                  )}
+                </Portal>
+              </Portal.Host>
+            </View>
+          </ThemedView>
+        </Provider>
+      </AppContext.Provider>
+    </ThemeProvider>
   );
 }

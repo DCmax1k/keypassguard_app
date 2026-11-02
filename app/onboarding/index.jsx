@@ -176,8 +176,12 @@ const OnboardingIndex = () => {
       // debugging - send server the response to display
       //sendData("/debuglog", {response: JSON.stringify(response)});
       const GoogleSigninModule = require("@react-native-google-signin/google-signin");
-      const { GoogleSignin, isSuccessResponse, isErrorWithCode, statusCodes } =
-        GoogleSigninModule;
+      const isSuccessResponse =
+        GoogleSigninModule.isSuccessResponse ||
+        ((res) => res?.type === "success");
+      const isErrorWithCode =
+        GoogleSigninModule.isErrorWithCode || (() => false);
+      const statusCodes = GoogleSigninModule.statusCodes || {};
 
       if (isSuccessResponse(response)) {
         const { idToken, user } = response.data;
