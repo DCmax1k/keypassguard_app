@@ -18,9 +18,10 @@ interface LockedInputProps {
   locked?: boolean;
   copy?: boolean;
   copyCallback?: () => void;
-  requestView?: () => string | Promise<string>;
+  requestView?: () => string | null | Promise<string | null>;
   wand?: boolean;
   onFocus?: (e: any) => void;
+  fontSize?: number;
 }
 
 export interface LockedInputRef {
@@ -44,13 +45,17 @@ const LockedInput = forwardRef<LockedInputRef, LockedInputProps>(
       requestView = () => {},
       wand = false,
       onFocus = () => {},
+      fontSize = 17,
     },
     ref,
   ) => {
     const [canView, setCanView] = useState(type === "password" ? false : true);
 
     const toggleView = async () => {
-      if (!canView) await requestView();
+      if (!canView) {
+        const password = await requestView();
+        if (password === null) return;
+      }
       setCanView(!canView);
     };
 
@@ -136,7 +141,7 @@ const LockedInput = forwardRef<LockedInputRef, LockedInputProps>(
               width: "100%",
               padding: 20,
               color: locked ? "rgb(73, 132, 164)" : Colors.dark.text,
-              fontSize: 17,
+              fontSize,
               fontFamily: "IBMMono",
             },
             type === "textarea"

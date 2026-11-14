@@ -30,6 +30,7 @@ interface Site {
   username: string;
   password: string;
   note: string;
+  url?: string;
 }
 
 export default function HomeScreen() {
@@ -85,6 +86,7 @@ export default function HomeScreen() {
       username: "",
       password: "",
       note: "",
+      url: "",
     };
     const data = {
       site: newSite,

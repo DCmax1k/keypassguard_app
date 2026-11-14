@@ -1,5 +1,6 @@
 import rightArrow from "@/assets/icons/rightArrow.png";
 import trash from "@/assets/icons/trash.png";
+import plus from "@/assets/icons/plus.png";
 import ConfirmMenu from "@/components/ConfirmMenu";
 import ImageContain from "@/components/ImageContain";
 import LockedInput, { LockedInputRef } from "@/components/LockedInput";
@@ -81,6 +82,8 @@ export default function AddSite() {
   const [username, setUsername] = useState(site.username);
   const [password, setPassword] = useState("");
   const [note, setNote] = useState(site.note);
+  const [url, setUrl] = useState(site.url ?? "");
+  const [showUrl, setShowUrl] = useState(Boolean(site.url));
   const [siteId, setSiteId] = useState(site.id);
 
   const cancelEdits = () => {
@@ -89,6 +92,8 @@ export default function AddSite() {
     setUsername(site.username);
     setPassword("");
     setNote(site.note);
+    setUrl(site.url ?? "");
+    setShowUrl(Boolean(site.url));
     setSiteId(site.id);
     setDecrypted(false);
     setEditMode(false);
@@ -97,13 +102,14 @@ export default function AddSite() {
   };
 
   const enableEdit = async () => {
-    await fetchDecrypt();
+    const decryptPass = await fetchDecrypt();
+    if (decryptPass === null) return;
     setEditMode(true);
   };
 
   const handleCancel = () => {
     // Confirm discard changes and cancel if so, set data back to what is was originally
-    if (name || username || password || note) {
+    if (name || username || password || note || url) {
       // Confirm
       setConfirmMenuData({
         title: "Discard Changes?",
@@ -135,6 +141,7 @@ export default function AddSite() {
       username,
       password,
       note,
+      url,
     };
     const response = await sendData("/dashboard/savesite", { site: newSite });
     if (response.status !== "success") {
@@ -160,6 +167,7 @@ export default function AddSite() {
     }
 
     setEditMode(false);
+    setShowUrl(Boolean(url));
     showAlert("Site successfully saved!");
   };
 
@@ -177,7 +185,7 @@ export default function AddSite() {
         });
         if (response.status !== "success") {
           showAlert(response.message, false);
-          return "";
+          return null;
         }
         const decryptPass = atob(response.data);
         setPassword(decryptPass);
@@ -185,7 +193,7 @@ export default function AddSite() {
         return decryptPass;
       } catch (err) {
         showAlert("An error occured, please try again later.", false);
-        return "";
+        return null;
       }
     }
     return password;
@@ -226,13 +234,8 @@ export default function AddSite() {
   };
 
   const copyPassToCB = async () => {
-    let pass = "";
-    if (!decrypted) {
-      pass = await fetchDecrypt();
-    } else {
-      pass = password;
-    }
-    copyToClipboard(pass);
+    const pass = decrypted ? password : await fetchDecrypt();
+    if (pass !== null) copyToClipboard(pass);
   };
 
   const copyToClipboard = async (text: string) => {
@@ -417,6 +420,57 @@ export default function AddSite() {
           copyCallback={() => copyToClipboard(note)}
           // onFocus={(event: any) => scrollToInput(event.target)}
         />
+        {(editMode || url) && (
+          <Animated.View entering={FadeIn}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={showUrl ? "Hide URL" : "Show URL"}
+              accessibilityState={{ expanded: showUrl }}
+              onPress={() => setShowUrl((isVisible) => !isVisible)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                alignSelf: "flex-start",
+                gap: 6,
+                marginTop: 16,
+                paddingVertical: 6,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Animated.View
+                key={showUrl ? "url-minus-icon" : "url-plus-icon"}
+                entering={FadeIn}
+                exiting={FadeOut}
+              >
+                {showUrl ? (
+                  <View
+                    style={{
+                      width: 14,
+                      height: 2,
+                      backgroundColor: Colors.dark.text,
+                    }}
+                  />
+                ) : (
+                  <ImageContain source={plus} size={14} />
+                )}
+              </Animated.View>
+              <ThemedText style={{ fontSize: 14 }}>URL</ThemedText>
+            </Pressable>
+          </Animated.View>
+        )}
+        {showUrl && (
+          <Animated.View entering={FadeIn} exiting={FadeOut}>
+            <Spacer height={12} />
+            <LockedInput
+              type={"text"}
+              value={url}
+              setValue={setUrl}
+              placeholder={"https://example.com"}
+              locked={!editMode}
+              fontSize={14}
+            />
+          </Animated.View>
+        )}
       </KeyboardAwareScrollView>
     </ThemedView>
   );
