@@ -5,7 +5,7 @@ import wandImg from "@/assets/icons/wand.svg";
 
 import Colors from "@/constants/Colors";
 import generateSecurePassword from "@/util/generateSecurePassword";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import ImageContain from "./ImageContain";
@@ -130,6 +130,7 @@ const LockedInput = forwardRef<LockedInputRef, LockedInputProps>(
         {/* Actual input */}
         <TextInput
           secureTextEntry={canView ? false : type === "password" ? true : false}
+          placeholderTextColor={"#4d4d4d"}
           style={[
             {
               width: "100%",
